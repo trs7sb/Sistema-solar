@@ -9,7 +9,7 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 15 // Número de planetas (incluyendo el Sol y lunas)
+#define NUM_PLANETS 40 // Número de planetas actualizado (15 originales + 25 nuevos)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 #define PI 3.14159265358979323846 // Definición de PI
 
@@ -36,7 +36,6 @@ void inicializarPlanetas(Planet planets[]) {
             {0, 29780 + 1022}}, // Luna de la Tierra
         {"Marte", 6.4171e23, {1.52 * AU, 0}, {0, 24070}},
         {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
-        // Lunas de Júpiter
         {"Ío", 8.9319e22, 
             {5.2 * AU + 421700000 * cos(0), 421700000 * sin(0)}, 
             { - sqrt(G * 1.8982e27 / 421700000) * sin(0), 
@@ -56,7 +55,33 @@ void inicializarPlanetas(Planet planets[]) {
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},
         {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
-        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}}
+        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}},
+        // Nuevos planetas ficticios
+        {"Planeta1", 2.5e24, {45.0 * AU, 0}, {0, 4000}},
+        {"Planeta2", 3.0e24, {50.0 * AU, 0}, {0, 3500}},
+        {"Planeta3", 1.5e24, {55.0 * AU, 0}, {0, 3000}},
+        {"Planeta4", 2.0e24, {60.0 * AU, 0}, {0, 2500}},
+        {"Planeta5", 1.8e24, {65.0 * AU, 0}, {0, 2000}},
+        {"Planeta6", 2.2e24, {70.0 * AU, 0}, {0, 1500}},
+        {"Planeta7", 1.9e24, {75.0 * AU, 0}, {0, 1000}},
+        {"Planeta8", 2.1e24, {80.0 * AU, 0}, {0, 900}},
+        {"Planeta9", 2.3e24, {85.0 * AU, 0}, {0, 800}},
+        {"Planeta10", 2.4e24, {90.0 * AU, 0}, {0, 700}},
+        {"Planeta11", 2.6e24, {95.0 * AU, 0}, {0, 600}},
+        {"Planeta12", 2.7e24, {100.0 * AU, 0}, {0, 500}},
+        {"Planeta13", 2.8e24, {105.0 * AU, 0}, {0, 400}},
+        {"Planeta14", 2.9e24, {110.0 * AU, 0}, {0, 300}},
+        {"Planeta15", 3.1e24, {115.0 * AU, 0}, {0, 200}},
+        {"Planeta16", 3.2e24, {120.0 * AU, 0}, {0, 100}},
+        {"Planeta17", 3.3e24, {125.0 * AU, 0}, {0, 50}},
+        {"Planeta18", 3.4e24, {130.0 * AU, 0}, {0, 25}},
+        {"Planeta19", 3.5e24, {135.0 * AU, 0}, {0, 10}},
+        {"Planeta20", 3.6e24, {140.0 * AU, 0}, {0, 5}},
+        {"Planeta21", 3.7e24, {145.0 * AU, 0}, {0, 2}},
+        {"Planeta22", 3.8e24, {150.0 * AU, 0}, {0, 1}},
+        {"Planeta23", 3.9e24, {155.0 * AU, 0}, {0, 0.5}},
+        {"Planeta24", 4.0e24, {160.0 * AU, 0}, {0, 0.2}},
+        {"Planeta25", 4.1e24, {165.0 * AU, 0}, {0, 0.1}}
     };
 
     int i;
@@ -202,7 +227,7 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
     // Energía cinética del sistema
     //#pragma omp parallel for divide la iteraciones del for entre los hilos disponibles
     //reduction(+:energiaCinetica) cada hilo tiene su propia copia privada de energiaCinetica y al final se suman todas las copias
-    #pragma omp parallel for reduction(+:energiaCineticaLocal) 
+   // #pragma omp parallel for reduction(+:energiaCineticaLocal) 
 
     calcularModulosVelocidad(planets, modulosVelocidad);
     for (i = 0; i < NUM_PLANETS; i++) {
@@ -223,7 +248,7 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
      double energiaPotencialLocal = 0; // Variable local para la reducción
      int j;
      double dx, dy, distancia;
-     #pragma omp parallel for reduction(+:energiaPotencialLocal)
+     //#pragma omp parallel for reduction(+:energiaPotencialLocal)
      for (i = 0; i < NUM_PLANETS; i++) {
          for (j = i + 1; j < NUM_PLANETS; j++) {
              dx = planets[j].position[0] - planets[i].position[0];
@@ -271,14 +296,14 @@ void actualizarPlanetas(Planet planets[], double dt) {
 }
 
 // Imprimir las posiciones de los planetas en un instante de tiempo
-void imprimirPosiciones(Planet planets[], double tiempo) {
-    printf("Tiempo: %.2f días\n", tiempo / DAY);
-    int i;
-    for ( i = 0; i < NUM_PLANETS; i++) {
-        printf("%s: x = %.2e, y = %.2e\n", planets[i].name, planets[i].position[0], planets[i].position[1]);
-    }
-    printf("\n"); //salto de línea
-}
+//void imprimirPosiciones(Planet planets[], double tiempo) {
+   // printf("Tiempo: %.2f días\n", tiempo / DAY);
+    //int i;
+   // for ( i = 0; i < NUM_PLANETS; i++) {
+   //     printf("%s: x = %.2e, y = %.2e\n", planets[i].name, planets[i].position[0], planets[i].position[1]);
+   // }
+    //printf("\n"); //salto de línea
+//}
 
 // Función para guardar las posiciones de los planetas en un archivo
 void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
@@ -414,9 +439,9 @@ int main() {
         double momento_angular_total = calcularMomentoAngularTotal(planets);
          fprintf(archivo_momento_total, "%.6e\n", momento_angular_total);
 
-        if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
-            imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales
-        }
+        //if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
+        //    imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales
+        //}
 
         // Volver a normalizar las unidades para continuar la simulación
         normalizarMasa(planets);
@@ -435,9 +460,9 @@ int main() {
     time_t fin = time(NULL); // Guardar el tiempo de finalización de la simulación
 
     // Imprimir los períodos de cada planeta
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        printf("%s: %.2f años\n", planets[i].name, periodos[i]/( factor_tiempo*DAY* YEAR)); 
-     }
+   // for (int i = 0; i < NUM_PLANETS; i++) {
+     //   printf("%s: %.2f años\n", planets[i].name, periodos[i]/( factor_tiempo*DAY* YEAR)); 
+     //}
 
 
     printf("Tiempo de inicio: %s", ctime(&inicio)); // Imprimir el tiempo de inicio
