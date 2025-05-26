@@ -171,13 +171,14 @@ b es un puntero de tipo Planet, apunta a una dirección de memoria de una variab
 void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
 
     double fuerzas[NUM_PLANETS][2] = {0};
-
+    int i, j, k;
     // Paralelizar el cálculo de las fuerzas gravitacionales
 
     //dynamic apropiado cuando las iteraciones tienen distintos costes computacionales
     //distribuye las iteraciones de manera dinámica entre los hilos sin orden considerando su tiempo de ejecución
-   // #pragma omp parallel for schedule(dynamic)
-   int i, j, k;
+    #pragma omp parallel for schedule(dynamic)
+
+ 
     for (i = 0; i < NUM_PLANETS; i++) {
         for (j = i + 1; j < NUM_PLANETS; j++) {
             double fx, fy;
@@ -196,11 +197,11 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
     }
 
     // Calcular aceleraciones a partir de las fuerzas
-   // #pragma omp parallel for
-    //for (k = 0; k < NUM_PLANETS; k++) {
-     //   a[k][0] = fuerzas[k][0] / planets[k].mass;
-      //  a[k][1] = fuerzas[k][1] / planets[k].mass;
-   // }
+    #pragma omp parallel for
+    for (k = 0; k < NUM_PLANETS; k++) {
+        a[k][0] = fuerzas[k][0] / planets[k].mass;
+        a[k][1] = fuerzas[k][1] / planets[k].mass;
+    }
 
     /* Creemos que calcular las aceleraciones a partir de la fuerzas disminuye el tiempo de ejecución porque 
     se calcula sólo la fuerza una vez por cada par de planetas,*/
@@ -224,12 +225,15 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
     double energiaCineticaLocal = 0;
     double velocidad2;
     int i;
-    // Energía cinética del sistema
-    //#pragma omp parallel for divide la iteraciones del for entre los hilos disponibles
-    //reduction(+:energiaCinetica) cada hilo tiene su propia copia privada de energiaCinetica y al final se suman todas las copias
-   // #pragma omp parallel for reduction(+:energiaCineticaLocal) 
 
     calcularModulosVelocidad(planets, modulosVelocidad);
+
+    // Energía cinética del sistema
+   // #pragma omp parallel for //divide la iteraciones del for entre los hilos disponibles
+   // reduction(+:energiaCinetica) cada hilo tiene su propia copia privada de energiaCinetica y al final se suman todas las copias
+    #pragma omp parallel for reduction(+:energiaCineticaLocal) 
+
+ 
     for (i = 0; i < NUM_PLANETS; i++) {
         energiaCineticaLocal += 0.5 * planets[i].mass * modulosVelocidad[i]*modulosVelocidad[i]; // Energía cinética
     }
@@ -353,7 +357,7 @@ double calcularMomentoAngularTotal(Planet planets[]) {
 
 int main() {
 
-    //omp_set_num_threads(2); 
+    omp_set_num_threads(2); 
     // Establecer el número de hilos 
 
     time_t inicio = time(NULL); // Guardar el tiempo de inicio de la simulación
