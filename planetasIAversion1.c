@@ -252,7 +252,7 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
      double energiaPotencialLocal = 0; // Variable local para la reducción
      int j;
      double dx, dy, distancia;
-     //#pragma omp parallel for reduction(+:energiaPotencialLocal)
+     #pragma omp parallel for reduction(+:energiaPotencialLocal)
      for (i = 0; i < NUM_PLANETS; i++) {
          for (j = i + 1; j < NUM_PLANETS; j++) {
              dx = planets[j].position[0] - planets[i].position[0];
